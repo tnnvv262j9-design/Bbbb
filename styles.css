@@ -1,5 +1,5 @@
 :root {
-    /* Spotify-inspired color palette */
+    /* Spotify/SaaS-inspired color palette */
     --bg-base: #000000;
     --bg-main: #121212;
     --bg-card: #181818;
@@ -25,12 +25,17 @@ body {
     height: 100vh;
     display: flex;
     overflow: hidden;
+    -webkit-font-smoothing: antialiased;
 }
 
 .app-container {
     display: flex;
     width: 100%;
     height: 100%;
+}
+
+.text-muted {
+    color: var(--text-muted);
 }
 
 /* --- Sidebar --- */
@@ -40,6 +45,7 @@ body {
     display: flex;
     flex-direction: column;
     padding: 24px 12px;
+    transition: all 0.3s ease;
 }
 
 .logo h2 {
@@ -49,6 +55,9 @@ body {
     font-weight: 700;
     letter-spacing: -0.5px;
     color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 nav ul {
@@ -97,6 +106,9 @@ nav li.active {
 
 header {
     margin-bottom: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 header h1 {
@@ -105,14 +117,27 @@ header h1 {
     letter-spacing: -1px;
 }
 
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
 .view {
     display: none;
     flex-direction: column;
     gap: 32px;
+    animation: fadeIn 0.3s ease;
 }
 
 .view.active-view {
     display: flex;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* --- Dashboard Cards --- */
@@ -148,35 +173,40 @@ header h1 {
     font-size: 36px;
     font-weight: 700;
     letter-spacing: -1px;
+    margin-bottom: 4px;
 }
 
 .card .amount.highlight {
     color: var(--accent);
 }
 
+.sub-amount {
+    font-size: 13px;
+    font-weight: 500;
+}
+
 /* --- Forms --- */
 .form-container h2 {
-    margin-bottom: 16px;
+    margin-bottom: 24px;
     font-size: 24px;
 }
 
-.form-container form {
+.form-group {
     display: flex;
     gap: 16px;
-    align-items: center;
-    flex-wrap: wrap;
+    width: 100%;
+    margin-bottom: 16px;
 }
 
-input {
+input[type="text"], input[type="number"] {
     background-color: #2A2A2A;
     border: 1px solid transparent;
     color: var(--text-main);
     padding: 14px 16px;
-    border-radius: 500px;
+    border-radius: 4px;
     font-size: 14px;
     outline: none;
     flex: 1;
-    min-width: 200px;
     transition: border 0.2s, background-color 0.2s;
 }
 
@@ -187,6 +217,66 @@ input:hover {
 input:focus {
     border: 1px solid #727272;
     background-color: #2A2A2A;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.form-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Toggle Switch (SaaS style) */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #535353;
+    transition: .3s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--accent);
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
 }
 
 .btn-primary {
@@ -210,6 +300,30 @@ input:focus {
 
 .btn-primary:active {
     transform: scale(0.98);
+}
+
+/* --- Badges --- */
+.badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    vertical-align: middle;
+}
+
+.badge.pro {
+    background-color: var(--accent);
+    color: var(--bg-base);
+    margin-left: 4px;
+}
+
+.badge.fixed {
+    background-color: #333333;
+    color: var(--text-main);
+    margin-left: 8px;
+    border: 1px solid #555;
 }
 
 /* --- Lists --- */
@@ -242,12 +356,14 @@ input:focus {
 .transaction-list li .info {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }
 
 .transaction-list li .desc {
     font-weight: 500;
     font-size: 16px;
+    display: flex;
+    align-items: center;
 }
 
 .transaction-list li .date {
@@ -266,4 +382,118 @@ input:focus {
 
 .transaction-list li .monto.pago {
     color: var(--text-main);
+}
+
+/* =========================================
+   Responsive Design (Mobile - Spotify Style)
+   ========================================= */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+    }
+
+    /* Convert Sidebar into a Bottom Navigation Bar */
+    .sidebar {
+        width: 100%;
+        height: 65px;
+        padding: 0;
+        flex-direction: row;
+        order: 2;
+        background: rgba(18, 18, 18, 0.95);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid #282828;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        z-index: 100;
+    }
+
+    .logo {
+        display: none; /* Hide logo on mobile to save space */
+    }
+
+    .sidebar nav {
+        width: 100%;
+        height: 100%;
+    }
+
+    nav ul {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+    }
+
+    nav li {
+        flex-direction: column;
+        gap: 4px;
+        font-size: 10px;
+        padding: 8px;
+        margin: 0;
+        flex: 1;
+        justify-content: center;
+        border-radius: 0;
+    }
+    
+    nav li.active {
+        background-color: transparent;
+        color: var(--text-main);
+    }
+    
+    nav li svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    /* Adjust Main Content */
+    .main-content {
+        margin: 0;
+        border-radius: 0;
+        padding: 20px 16px 85px 16px; /* Extra bottom padding for the fixed nav */
+        order: 1;
+    }
+
+    header h1 {
+        font-size: 24px;
+    }
+
+    .summary-cards {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .card {
+        min-width: 100%;
+        padding: 20px;
+    }
+
+    /* Forms */
+    .form-group {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-primary {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .transaction-list li {
+        padding: 12px 16px;
+    }
+    
+    .transaction-list li .desc {
+        font-size: 14px;
+    }
+    
+    .transaction-list li .monto {
+        font-size: 14px;
+    }
 }

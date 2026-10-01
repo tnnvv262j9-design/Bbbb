@@ -1,4 +1,4 @@
-// Array para almacenar los datos (se podría conectar a localStorage más adelante)
+// Array para almacenar los datos (se podría conectar a localStorage o a un backend SaaS)
 let transactions = [];
 
 // Elementos del DOM
@@ -8,7 +8,9 @@ const pageTitle = document.getElementById('page-title');
 
 const totalBalanceEl = document.getElementById('total-balance');
 const totalIncomesEl = document.getElementById('total-incomes');
+const fixedIncomesEl = document.getElementById('fixed-incomes');
 const totalPaymentsEl = document.getElementById('total-payments');
+const fixedPaymentsEl = document.getElementById('fixed-payments');
 
 const formIngreso = document.getElementById('form-ingreso');
 const formPago = document.getElementById('form-pago');
@@ -33,16 +35,20 @@ navItems.forEach(item => {
         // Actualizar vista visible
         views.forEach(view => view.classList.remove('active-view'));
         document.getElementById(target).classList.add('active-view');
+        
+        // Scroll top en móvil al cambiar de vista
+        document.querySelector('.main-content').scrollTop = 0;
     });
 });
 
-// Manejo de Formularios
+// Manejo de Formularios (SaaS)
 formIngreso.addEventListener('submit', (e) => {
     e.preventDefault();
     const desc = document.getElementById('desc-ingreso').value;
     const amount = parseFloat(document.getElementById('monto-ingreso').value);
+    const isFixed = document.getElementById('fijo-ingreso').checked;
     
-    addTransaction(desc, amount, 'ingreso');
+    addTransaction(desc, amount, 'ingreso', isFixed);
     formIngreso.reset();
 });
 
@@ -50,18 +56,20 @@ formPago.addEventListener('submit', (e) => {
     e.preventDefault();
     const desc = document.getElementById('desc-pago').value;
     const amount = parseFloat(document.getElementById('monto-pago').value);
+    const isFixed = document.getElementById('fijo-pago').checked;
     
-    addTransaction(desc, amount, 'pago');
+    addTransaction(desc, amount, 'pago', isFixed);
     formPago.reset();
 });
 
 // Lógica Principal
-function addTransaction(desc, amount, type) {
+function addTransaction(desc, amount, type, isFixed = false) {
     const transaction = {
         id: Date.now(),
         desc,
         amount,
         type,
+        isFixed,
         date: new Date().toLocaleDateString('es-ES', { 
             year: 'numeric', 
             month: 'short', 
@@ -83,19 +91,30 @@ function formatCurrency(value) {
 // Actualizar la interfaz con los nuevos datos
 function updateUI() {
     // Calcular totales
-    const incomes = transactions
-        .filter(t => t.type === 'ingreso')
-        .reduce((acc, t) => acc + t.amount, 0);
-        
-    const payments = transactions
-        .filter(t => t.type === 'pago')
-        .reduce((acc, t) => acc + t.amount, 0);
+    let incomes = 0;
+    let fixedIncomes = 0;
+    let payments = 0;
+    let fixedPayments = 0;
+
+    transactions.forEach(t => {
+        if (t.type === 'ingreso') {
+            incomes += t.amount;
+            if (t.isFixed) fixedIncomes += t.amount;
+        } else if (t.type === 'pago') {
+            payments += t.amount;
+            if (t.isFixed) fixedPayments += t.amount;
+        }
+    });
         
     const balance = incomes - payments;
 
     // Actualizar tarjetas del Dashboard
     totalIncomesEl.textContent = formatCurrency(incomes);
+    fixedIncomesEl.textContent = `Fijos (Recurrentes): ${formatCurrency(fixedIncomes)}`;
+    
     totalPaymentsEl.textContent = formatCurrency(payments);
+    fixedPaymentsEl.textContent = `Fijos (Suscripciones): ${formatCurrency(fixedPayments)}`;
+    
     totalBalanceEl.textContent = formatCurrency(balance);
     
     // Cambiar color del balance si es negativo
@@ -132,10 +151,13 @@ function renderList(container, items) {
         const isIngreso = item.type === 'ingreso';
         const sign = isIngreso ? '+' : '-';
         const typeClass = isIngreso ? 'ingreso' : 'pago';
+        
+        // Badge si es fijo
+        const fixedBadge = item.isFixed ? `<span class="badge fixed">Fijo</span>` : '';
 
         li.innerHTML = `
             <div class="info">
-                <span class="desc">${item.desc}</span>
+                <span class="desc">${item.desc} ${fixedBadge}</span>
                 <span class="date">${item.date}</span>
             </div>
             <span class="monto ${typeClass}">${sign} ${formatCurrency(item.amount)}</span>
@@ -145,5 +167,10 @@ function renderList(container, items) {
     });
 }
 
-// Inicializar UI vacía
+// Inicializar UI con datos de ejemplo (Simulando un SaaS con historial)
+transactions = [
+    { id: 1, desc: "Salario Mensual", amount: 3500, type: "ingreso", isFixed: true, date: "1 oct 2026, 09:00" },
+    { id: 2, desc: "Suscripción Netflix", amount: 15.99, type: "pago", isFixed: true, date: "2 oct 2026, 10:15" },
+    { id: 3, desc: "Cena Restaurante", amount: 45.50, type: "pago", isFixed: false, date: "3 oct 2026, 20:30" }
+];
 updateUI();
