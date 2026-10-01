@@ -123,6 +123,32 @@
                     </ul>
                 </div>
             </section>
+
+            <!-- Edit Modal -->
+            <div id="edit-modal" class="modal-overlay">
+                <div class="modal-content">
+                    <h2>Editar Transacción</h2>
+                    <form id="form-edit">
+                        <input type="hidden" id="edit-id">
+                        <input type="hidden" id="edit-type">
+                        <div class="form-group" style="flex-direction: column;">
+                            <input type="text" id="edit-desc" placeholder="Descripción" required>
+                            <input type="number" id="edit-amount" placeholder="Monto" required min="0.01" step="0.01">
+                        </div>
+                        <div class="form-toggle" style="margin-bottom: 24px;">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="edit-fixed">
+                                <span class="slider"></span>
+                            </label>
+                            <span>Transacción Fija</span>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" onclick="closeEditModal()">Cancelar</button>
+                            <button type="submit" class="btn-primary">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </main>
     </div>
     <script src="app.js"></script>

@@ -160,12 +160,65 @@ function renderList(container, items) {
                 <span class="desc">${item.desc} ${fixedBadge}</span>
                 <span class="date">${item.date}</span>
             </div>
-            <span class="monto ${typeClass}">${sign} ${formatCurrency(item.amount)}</span>
+            <div class="transaction-actions">
+                <span class="monto ${typeClass}">${sign} ${formatCurrency(item.amount)}</span>
+                <div class="actions">
+                    <button onclick="openEditModal(${item.id})" class="btn-icon" title="Editar">✏️</button>
+                    <button onclick="deleteTransaction(${item.id})" class="btn-icon" title="Borrar">🗑️</button>
+                </div>
+            </div>
         `;
         
         container.appendChild(li);
     });
 }
+
+// === Funciones de Edición y Borrado ===
+
+function deleteTransaction(id) {
+    if (confirm('¿Estás seguro de que deseas borrar esta transacción?')) {
+        transactions = transactions.filter(t => t.id !== id);
+        updateUI();
+    }
+}
+
+const editModal = document.getElementById('edit-modal');
+const formEdit = document.getElementById('form-edit');
+
+function openEditModal(id) {
+    const transaction = transactions.find(t => t.id === id);
+    if (!transaction) return;
+
+    document.getElementById('edit-id').value = transaction.id;
+    document.getElementById('edit-type').value = transaction.type;
+    document.getElementById('edit-desc').value = transaction.desc;
+    document.getElementById('edit-amount').value = transaction.amount;
+    document.getElementById('edit-fixed').checked = transaction.isFixed;
+
+    editModal.classList.add('active');
+}
+
+function closeEditModal() {
+    editModal.classList.remove('active');
+}
+
+formEdit.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const id = parseInt(document.getElementById('edit-id').value);
+    const desc = document.getElementById('edit-desc').value;
+    const amount = parseFloat(document.getElementById('edit-amount').value);
+    const isFixed = document.getElementById('edit-fixed').checked;
+
+    const index = transactions.findIndex(t => t.id === id);
+    if (index !== -1) {
+        transactions[index].desc = desc;
+        transactions[index].amount = amount;
+        transactions[index].isFixed = isFixed;
+        updateUI();
+        closeEditModal();
+    }
+});
 
 // Inicializar UI con datos de ejemplo (Simulando un SaaS con historial)
 transactions = [

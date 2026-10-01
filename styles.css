@@ -384,6 +384,93 @@ input:checked + .slider:before {
     color: var(--text-main);
 }
 
+/* --- Transaction Actions (Edit/Delete) --- */
+.transaction-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.transaction-list li:hover .actions {
+    opacity: 1;
+}
+
+.btn-icon {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 6px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.btn-icon:hover {
+    background: var(--bg-card-hover);
+}
+
+/* --- Modal Styles --- */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(5px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background: var(--bg-card);
+    padding: 32px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    animation: fadeIn 0.2s ease;
+}
+
+.modal-content h2 {
+    margin-bottom: 24px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--text-main);
+    border: 1px solid #727272;
+    padding: 14px 24px;
+    border-radius: 500px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: background 0.2s, border 0.2s;
+}
+
+.btn-secondary:hover {
+    border-color: var(--text-main);
+    background: rgba(255,255,255,0.1);
+}
+
 /* =========================================
    Responsive Design (Mobile - Spotify Style)
    ========================================= */
@@ -495,5 +582,9 @@ input:checked + .slider:before {
     
     .transaction-list li .monto {
         font-size: 14px;
+    }
+
+    .actions {
+        opacity: 1; /* Always show actions on mobile */
     }
 }
