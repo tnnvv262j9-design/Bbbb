@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Financify - Finanzas Personales SaaS</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- Chart.js para los Gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -27,6 +29,10 @@
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
                         <span>Gastos</span>
                     </li>
+                    <li data-target="presupuestos">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                        <span>Presupuestos</span>
+                    </li>
                 </ul>
             </nav>
         </aside>
@@ -35,8 +41,17 @@
         <main class="main-content">
             <header>
                 <h1 id="page-title">Dashboard</h1>
-                <div class="user-profile">
-                    <img src="https://ui-avatars.com/api/?name=Usuario+SaaS&background=1DB954&color=fff" alt="User" class="avatar">
+                <div class="header-actions">
+                    <select id="currency-selector" class="select-input">
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="MXN">MXN ($)</option>
+                        <option value="COP">COP ($)</option>
+                    </select>
+                    <button id="btn-export" class="btn-secondary btn-sm" title="Exportar a CSV">📥 CSV</button>
+                    <div class="user-profile">
+                        <img src="https://ui-avatars.com/api/?name=Usuario+SaaS&background=1DB954&color=fff" alt="User" class="avatar">
+                    </div>
                 </div>
             </header>
 
@@ -58,6 +73,20 @@
                         <p id="fixed-payments" class="sub-amount text-muted">Fijos: $0.00</p>
                     </div>
                 </div>
+
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3>Resumen Mensual (Ingresos vs Gastos)</h3>
+                        <canvas id="chart-balance"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Gastos por Categoría</h3>
+                        <div class="canvas-wrapper">
+                            <canvas id="chart-categories"></canvas>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="recent-transactions">
                     <h2>Últimos Movimientos</h2>
                     <ul id="recent-list" class="transaction-list">
@@ -72,7 +101,14 @@
                     <h2>Registrar Ingreso</h2>
                     <form id="form-ingreso">
                         <div class="form-group">
-                            <input type="text" id="desc-ingreso" placeholder="Descripción (ej. Salario, Venta)" required>
+                            <input type="text" id="desc-ingreso" placeholder="Descripción (ej. Salario)" required>
+                            <select id="cat-ingreso" class="select-input" required>
+                                <option value="" disabled selected>Categoría</option>
+                                <option value="Salario">Salario</option>
+                                <option value="Ventas">Ventas</option>
+                                <option value="Inversiones">Inversiones</option>
+                                <option value="Otros">Otros</option>
+                            </select>
                             <input type="number" id="monto-ingreso" placeholder="Monto" required min="0.01" step="0.01">
                         </div>
                         <div class="form-actions">
@@ -101,7 +137,16 @@
                     <h2>Registrar Gasto</h2>
                     <form id="form-pago">
                         <div class="form-group">
-                            <input type="text" id="desc-pago" placeholder="Descripción (ej. Renta, Software)" required>
+                            <input type="text" id="desc-pago" placeholder="Descripción (ej. Supermercado)" required>
+                            <select id="cat-pago" class="select-input" required>
+                                <option value="" disabled selected>Categoría</option>
+                                <option value="Comida">Comida</option>
+                                <option value="Transporte">Transporte</option>
+                                <option value="Hogar">Hogar</option>
+                                <option value="Entretenimiento">Entretenimiento</option>
+                                <option value="Suscripciones">Suscripciones</option>
+                                <option value="Otros">Otros</option>
+                            </select>
                             <input type="number" id="monto-pago" placeholder="Monto" required min="0.01" step="0.01">
                         </div>
                         <div class="form-actions">
@@ -124,6 +169,34 @@
                 </div>
             </section>
 
+            <!-- Presupuestos View -->
+            <section id="presupuestos" class="view">
+                <div class="form-container card">
+                    <h2>Fijar Presupuesto por Categoría</h2>
+                    <form id="form-presupuesto">
+                        <div class="form-group">
+                            <select id="cat-presupuesto" class="select-input" required>
+                                <option value="" disabled selected>Categoría de Gasto</option>
+                                <option value="Comida">Comida</option>
+                                <option value="Transporte">Transporte</option>
+                                <option value="Hogar">Hogar</option>
+                                <option value="Entretenimiento">Entretenimiento</option>
+                                <option value="Suscripciones">Suscripciones</option>
+                                <option value="Otros">Otros</option>
+                            </select>
+                            <input type="number" id="monto-presupuesto" placeholder="Límite Mensual Máximo" required min="1" step="1">
+                            <button type="submit" class="btn-primary">Guardar Presupuesto</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="list-container">
+                    <h2>Estado de tus Presupuestos</h2>
+                    <div id="budgets-list" class="budgets-container">
+                        <!-- Generado por JS -->
+                    </div>
+                </div>
+            </section>
+
             <!-- Edit Modal -->
             <div id="edit-modal" class="modal-overlay">
                 <div class="modal-content">
@@ -133,6 +206,9 @@
                         <input type="hidden" id="edit-type">
                         <div class="form-group" style="flex-direction: column;">
                             <input type="text" id="edit-desc" placeholder="Descripción" required>
+                            <select id="edit-cat" class="select-input" required>
+                                <!-- Se llena dinámicamente en JS -->
+                            </select>
                             <input type="number" id="edit-amount" placeholder="Monto" required min="0.01" step="0.01">
                         </div>
                         <div class="form-toggle" style="margin-bottom: 24px;">
